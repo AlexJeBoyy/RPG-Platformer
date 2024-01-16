@@ -17,6 +17,9 @@ public class RBPlayerMovement : MonoBehaviour
     public float airMultiplier;
     bool readyToJump = true;
 
+    public float climbSpeed;
+    public bool climbing;
+
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space;
 
@@ -24,7 +27,7 @@ public class RBPlayerMovement : MonoBehaviour
     [Header("Ground Check")]
     public float playerHeight;
     public LayerMask whatIsGround;
-    bool grounded;
+    public bool grounded;
 
     public Transform orientation;
 
@@ -34,7 +37,7 @@ public class RBPlayerMovement : MonoBehaviour
     Vector3 moveDirection;
 
     Rigidbody rb;
-
+    public Climbing climbingScript;
    
    
     
@@ -48,6 +51,7 @@ public class RBPlayerMovement : MonoBehaviour
         rb.freezeRotation = true;
         currentSpeed = moveSpeed;
 
+        Physics.gravity = new Vector3(0, -30f, 0);
 
     }
     private void Update()
@@ -55,14 +59,16 @@ public class RBPlayerMovement : MonoBehaviour
         //checks if grounded
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
-
+       
         MyInput();
         SpeedControl();
 
         //handle drag
-        
-
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (climbing)
+        {
+            moveSpeed = climbSpeed;
+        } 
+        else if (Input.GetKey(KeyCode.LeftShift))
         {
             moveSpeed = runningSpeed;
         }
@@ -103,7 +109,7 @@ public class RBPlayerMovement : MonoBehaviour
 
     private void MovePlayer() //moves the player
     {
-       
+       if (climbingScript.exitingWall) return;
 
         //calculates movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
@@ -145,20 +151,7 @@ public class RBPlayerMovement : MonoBehaviour
         readyToJump = true;
     }
 
-    public Vector3 CalculateJumpVelocity(Vector3 startPoint, Vector3 endPoint, float trajectoryHeight)
-    {
-        float gravity = Physics.gravity.y;
-        float displacementY = endPoint.y - startPoint.y;
-        Vector3 displacementXZ = new Vector3(endPoint.x - startPoint.x, 0f, endPoint.z - startPoint.z);
-
-        Vector3 velocityY = Vector3.up * Mathf.Sqrt(-2 * gravity * trajectoryHeight);
-        Vector3 velocityXZ = displacementXZ / (Mathf.Sqrt(-2 * trajectoryHeight / gravity)
-            + Mathf.Sqrt(2 * (displacementY - trajectoryHeight) / gravity));
-
-        return velocityXZ + velocityY;
-    }
-
-   
+    
 
     private Vector3 velocityToSet;
     private void SetVelocity()
