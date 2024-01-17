@@ -160,8 +160,15 @@ public class RBPlayerMovement : MonoBehaviour
         rb.velocity = velocityToSet;
     }
 
-  
-   
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        //if ()
+        //{
+
+        //}
+    }
+
 }
 
    
